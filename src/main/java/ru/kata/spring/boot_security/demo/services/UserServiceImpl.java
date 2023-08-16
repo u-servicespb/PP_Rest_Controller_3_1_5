@@ -31,7 +31,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userDao.loadUserByUsername(name);
     }
 
-
     @Override
     public List<User> listUser() {
         return userDao.listUser();

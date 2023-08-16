@@ -4,7 +4,6 @@ console.log("")
 
 currentUser = fetch(url).then((response) => response.json())
 
-// Таблица
 currentUser.then((user) =>{
     let roles = "";
     user.roles.forEach((name) => {

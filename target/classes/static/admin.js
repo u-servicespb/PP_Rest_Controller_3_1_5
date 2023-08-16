@@ -39,7 +39,6 @@ allUser.then(listUsers => {
     }
 )
 
-
 const urlRole = "http://localhost:8080/api/admin/roles"
 const listRoles = fetch(urlRole).then(response => response.json())
 const fillRole = function (elementId) {
@@ -54,9 +53,6 @@ const fillRole = function (elementId) {
 }
 
 fillRole("role_select")
-
-//__________________________________________________________________________________
-
 
 const urlPost = "http://localhost:8080/api/admin/add"
 
@@ -92,7 +88,7 @@ document.getElementById("newUserForm")
         })
         document.getElementById("all-users-tab").click()
     })
-//_______________________________________________________________________________________
+
 pageUser = fetch(urlAdmin).then(response => response.json())
 pageUser.then((user) => {
     let rol = "";
@@ -111,11 +107,9 @@ pageUser.then((user) => {
     document.getElementById("user-table").innerHTML = result;
 })
 
-
 const urlPATCH = "http://localhost:8080/api/admin/update"
 
 const editUserModel = new bootstrap.Modal(document.getElementById("editUserModal"))
-
 
 const editId = document.getElementById("id_edit")
 const editUsername = document.getElementById("Username_edit")
@@ -125,7 +119,6 @@ const editRole = document.getElementById("role_edit")
 
 const formEdit = document.getElementById("edit_user_form")
 
-//модальное окно Edit
 on(document, 'click', '#editUserBtn', e => {
     const fila = e.parentNode.parentNode
     let option = ''
@@ -177,7 +170,6 @@ formEdit.addEventListener('submit', e => {
 const urlDelete = "http://localhost:8080/api/admin/delete/"
 
 const deleteModalBtn = new bootstrap.Modal(document.getElementById("deleteUserModal"))
-
 
 let rowDelete = null
 on(document, 'click', '#deleteUserBtn', e => {
