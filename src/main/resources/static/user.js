@@ -1,22 +1,23 @@
-const url = "http://localhost:8080/api/user/"
+const userUrl = 'http://localhost:8080/api/user';
 
-console.log("")
 
-currentUser = fetch(url).then((response) => response.json())
+function getUserPage() {
+    fetch(userUrl).then(response => response.json()).then(user =>
+        getInformationAboutUser(user))
+}
 
-currentUser.then((user) =>{
-    let roles = "";
-    user.roles.forEach((name) => {
-        roles += " ";
-        roles += name.role.replace("ROLE_", "");
-    });
+function getInformationAboutUser(user) {
 
-    let result = "";
-    result += `<tr>
-                    <td>${user.id}</td>
-                    <td>${user.username}</td>
-                    <td>${user.age}</td>
-                    <td>${roles}</td>
-                   </tr>`;
-    document.getElementById("user-info-table").innerHTML = result;
-})
+    let result = '';
+    result =
+
+        `<tr>
+    <td>${user.id}</td>
+    <td>${user.userName}</td>
+    <td>${user.age}</td>
+    <td id=${'role' + user.id}>${user.role.map(r => r.role.substring(5)).join(', ')}</td>
+</tr>`
+    document.getElementById('userTableBody').innerHTML = result;
+}
+
+getUserPage();

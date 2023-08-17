@@ -3,18 +3,20 @@ package ru.kata.spring.boot_security.demo.dao;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.kata.spring.boot_security.demo.model.User;
 
+
 import java.util.List;
-import java.util.Optional;
 
 public interface UserDao extends UserDetailsService {
 
-    List<User> listUser();
+    List<User> findAll();
 
-    Optional<User> getUser(long id);
+    User findByName(String username);
 
-    Optional<User> getUser(String name);
+    User getUser(Long id);
 
     void saveUser(User user);
 
-    void deleteUser(long id);
+    void updateUser(User user);
+
+    void deleteUser(Long id);
 }

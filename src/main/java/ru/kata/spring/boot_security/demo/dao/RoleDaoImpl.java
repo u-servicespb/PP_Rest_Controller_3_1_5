@@ -17,18 +17,24 @@ public class RoleDaoImpl implements RoleDao {
         this.roleRepository = roleRepository;
     }
 
+
     @Override
-    public List<Role> listRoles() {
+    public Role findRoleById(Long id) {
+        return roleRepository.findById(id).get();
+    }
+
+    @Override
+    public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }
 
     @Override
-    public void saveRole(Role role) {
-        roleRepository.save(role);
+    public List<Role> getRoles() {
+        return roleRepository.findAll();
     }
 
     @Override
-    public void deleteRole(long id) {
-        roleRepository.deleteById(id);
+    public void save(Role role) {
+        roleRepository.save(role);
     }
 }

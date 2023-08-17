@@ -1,201 +1,164 @@
-const on = (element, event, selector, handler) => {
-    element.addEventListener(event, e => {
-        if (e.target.closest(selector)) {
-            handler(e.target)
-        }
-    })
+const url = 'http://localhost:8080/api/admin';
+
+
+function getUserData() {
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            loadTable(data)
+        })
 }
 
-const urlAdmin = "http://localhost:8080/api/admin/"
-currentUser = fetch(urlAdmin).then((response) => response.json())
+function getAllUsers() {
+    fetch(url).then(response => response.json()).then(user =>
+        loadTable(user))
+}
 
-const urlAllUser = "http://localhost:8080/api/admin/users"
-
-const allUser = fetch(urlAllUser)
-    .then((response) => response.json())
-
-allUser.then(listUsers => {
-        let result = ''
-        for (const i in listUsers) {
-            let roles = ''
-            listUsers[i].roles.forEach(name => {
-                roles += ' '
-                roles += name.role.replace("ROLE_", "")
-            })
-            result += `<tr>
-                    <td>${listUsers[i].id}</td>
-                    <td>${listUsers[i].username}</td>
-                    <td>${listUsers[i].age}</td>
-                    <td>${roles}</td>
-                    <td>
-                        <button type="button" class="btn btn-info btn-sm text-white" id="editUserBtn">Edit</button>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm" id="deleteUserBtn">Delete</button>
-                    </td>
-                    </tr>`
-        }
-        document.getElementById("users-table").innerHTML = result
+function loadTable(listAllUsers) {
+    let res = '';
+    for (let user of listAllUsers) {
+        res +=
+            `<tr>
+                <td>${user.id}</td>             
+                <td>${user.userName}</td>
+                <td>${user.age}</td>
+                <td id=${'role' + user.id}>${user.role.map(r => r.role.substring(5)).join(', ')}</td>
+                <td>
+                    <button class="btn btn-info" type="button"
+                    data-bs-toggle="modal" data-bs-target="#editModal"
+                    onclick="editModal(${user.id})">Edit</button></td>
+                <td>
+                    <button class="btn btn-danger" type="button"
+                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                    onclick="deleteModal(${user.id})">Delete</button></td>
+            </tr>`
     }
-)
-
-const urlRole = "http://localhost:8080/api/admin/roles"
-const listRoles = fetch(urlRole).then(response => response.json())
-const fillRole = function (elementId) {
-    listRoles.then(roles => {
-        let result = ''
-        for (const i in roles) {
-            result += `<option value=${roles[i].id}>${roles[i].role.replace("ROLE_", "")}
-                       </option>`
-        }
-        document.getElementById(elementId).innerHTML = result
-    })
+    document.getElementById('tableBodyAdmin').innerHTML = res;
 }
 
-fillRole("role_select")
+getAllUsers();
 
-const urlPost = "http://localhost:8080/api/admin/add"
-
-const newUserForm = document.getElementById("newUserForm")
-document.getElementById("newUserForm")
-    .addEventListener("submit", (e) => {
-        e.preventDefault()
-        let nameRole = document.getElementById("role_select")
-        let listRoles = []
-        let roleValue = ""
-        for (let i = 0; i < nameRole.options.length; i++) {
-            if (nameRole.options[i].selected) {
-                listRoles.push({
-                    id: nameRole.options[i].value,
-                    role: "ROLE_" + nameRole.options[i].innerHTML
-                })
-                roleValue += nameRole.options[i].innerHTML + ''
-            }
-        }
-        fetch(urlPost, {
-            method: "POST",
-            headers: {
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify({
-                username: document.getElementById("Username").value,
-                age: document.getElementById("age").value,
-                password: document.getElementById("password").value,
-                roles: listRoles
-            })
-        }).then(() => {
-            newUserForm.reset()
-        })
-        document.getElementById("all-users-tab").click()
-    })
-
-pageUser = fetch(urlAdmin).then(response => response.json())
-pageUser.then((user) => {
-    let rol = "";
-    user.roles.forEach((name) => {
-        rol += " ";
-        rol += name.role.replace("ROLE_", "");
-    });
-
-    let result = "";
-    result += `<tr>
-                    <td>${user.id}</td>
-                    <td>${user.username}</td>
-                    <td>${user.age}</td>
-                    <td>${rol}</td>
-                   </tr>`;
-    document.getElementById("user-table").innerHTML = result;
-})
-
-const urlPATCH = "http://localhost:8080/api/admin/update"
-
-const editUserModel = new bootstrap.Modal(document.getElementById("editUserModal"))
-
-const editId = document.getElementById("id_edit")
-const editUsername = document.getElementById("Username_edit")
-const editage = document.getElementById("age_edit")
-const editPassword = document.getElementById("password_edit")
-const editRole = document.getElementById("role_edit")
-
-const formEdit = document.getElementById("edit_user_form")
-
-on(document, 'click', '#editUserBtn', e => {
-    const fila = e.parentNode.parentNode
-    let option = ''
-    editId.value = fila.children[0].innerHTML
-    editUsername.value = fila.children[1].innerHTML
-    editage.value = fila.children[2].innerHTML
-    editPassword.value = fila.children[3].innerHTML
-    listRoles.then(rolList => {
-        rolList.forEach(name => {
-            let selected = fila.children[4].innerHTML.includes(name.role.replace('ROLE_', '')) ? 'selected' : ''
-            option += `
-                <option value="${name.id}" ${selected}>${name.role.replace('ROLE_', '')}</option>`
-
-        })
-        editRole.innerHTML = option
-    })
-    editUserModel.show()
-})
-
-formEdit.addEventListener('submit', e => {
+// Новый юзер
+document.getElementById('newUserForm').addEventListener('submit', (e) => {
     e.preventDefault()
-    let nameRoleEdit = document.getElementById("role_edit")
-    let listRoleEdit = []
-    let roleValueEdit = ''
-
-    for (let i = 0; i < nameRoleEdit.options.length; i++) {
-        if (nameRoleEdit.options[i].selected) {
-            listRoleEdit.push({id: nameRoleEdit.options[i].value, role: 'ROLE_' + nameRoleEdit.options[i].innerHTML})
-            roleValueEdit += nameRoleEdit.options[i].innerHTML + ' '
+    let role = document.getElementById('role_select')
+    let rolesAddUser = []
+    let rolesAddUserValue = ''
+    for (let i = 0; i < role.options.length; i++) {
+        if (role.options[i].selected) {
+            rolesAddUser.push({id: role.options[i].value, name: 'ROLE_' + role.options[i].innerHTML})
+            rolesAddUserValue += role.options[i].innerHTML
         }
     }
-
-    fetch(urlPATCH, {
-        method: "PATCH",
+    fetch(url, {
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json;charset=utf-8'
         },
         body: JSON.stringify({
-            id: editId.value,
-            username: editUsername.value,
-            age: editage.value,
-            password: editPassword.value,
-            roles: listRoleEdit
+            userName: document.getElementById('newUserName').value,
+            age: document.getElementById('newAge').value,
+            password: document.getElementById('newPassword').value,
+            role: rolesAddUser
         })
     })
-    editUserModel.hide()
-})
-
-const urlDelete = "http://localhost:8080/api/admin/delete/"
-
-const deleteModalBtn = new bootstrap.Modal(document.getElementById("deleteUserModal"))
-
-let rowDelete = null
-on(document, 'click', '#deleteUserBtn', e => {
-    rowDelete = e.parentNode.parentNode
-    document.getElementById('id_delete').value = rowDelete.children[0].innerHTML
-    document.getElementById('Username_delete').value = rowDelete.children[1].innerHTML
-    document.getElementById('age_delete').value = rowDelete.children[2].innerHTML
-
-    let option = ''
-    listRoles.then(roles => {
-        roles.forEach(role => {
-            if (rowDelete.children[3].innerHTML.includes(role.role.replace('ROLE_', ''))) {
-                option += `<option value="${role.id}">${role.role.replace('ROLE_', '')}</option>`
+        .then((response) => {
+            if (response.ok) {
+                getUserData()
+                document.getElementById("all-users-tab").click()
             }
         })
-        document.getElementById('role_delete').innerHTML = option
-    })
-    deleteModalBtn.show()
 })
 
-document.getElementById('delete_user_form').addEventListener('submit', (e) => {
-    e.preventDefault()
-    fetch(urlDelete + rowDelete.children[0].innerHTML, {
-        method: 'DELETE'
-    }).then(() => {
-        deleteModalBtn.hide()
-        rowDelete.parentNode.removeChild(rowDelete)
+//Изменение юзера
+function editModal(id) {
+    fetch(url + '/' + id, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8'
+        }
+    }).then(res => {
+        res.json().then(u => {
+
+            document.getElementById('editId').value = u.id;
+            document.getElementById('editUserName').value = u.userName;
+            document.getElementById('editAge').value = u.age;
+            document.getElementById('editPassword').value = "****";
+
+        })
+    });
+}
+
+
+async function editUser() {
+    const form_ed = document.getElementById('modalEdit');
+
+    let idValue = document.getElementById("editId").value;
+    let userNameValue = document.getElementById("editUserName").value;
+    let ageValue = document.getElementById('editAge').value;
+    let passwordValue = document.getElementById("editPassword").value;
+    let listOfRole = [];
+    for (let i = 0; i < form_ed.role.options.length; i++) {
+        if (form_ed.role.options[i].selected) {
+            let tmp = {};
+            tmp["id"] = form_ed.role.options[i].value
+            listOfRole.push(tmp);
+        }
+    }
+    let user = {
+        id: idValue,
+        userName: userNameValue,
+        age: ageValue,
+        password: passwordValue,
+        role: listOfRole
+    }
+    await fetch(url + '/' + user.id, {
+        method: "PUT",
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8'
+        },
+        body: JSON.stringify(user)
+    });
+    closeModal()
+    getUserData()
+}
+
+// Удаление юзера
+function deleteModal(id) {
+    fetch(url + '/' + id, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8'
+        }
+    }).then(res => {
+        res.json().then(u => {
+            document.getElementById('deleteId').value = u.id;
+            document.getElementById('deleteUserName').value = u.userName;
+            document.getElementById('deleteAge').value = u.age;
+            document.getElementById("deleteRole").value = u.role.map(r => r.role.substring(5)).join(", ");
+        })
+    });
+}
+
+async function deleteUser() {
+    const id = document.getElementById("deleteId").value
+    console.log(id)
+    let urlDel = url + "/" + id;
+    let method = {
+        method: 'DELETE',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+
+    fetch(urlDel, method).then(() => {
+        closeModal()
+        getUserData()
     })
-})
+}
+
+function closeModal() {
+    // document.getElementById("editClose").click()
+    document.querySelectorAll(".btn-close").forEach((btn) => btn.click())
+}

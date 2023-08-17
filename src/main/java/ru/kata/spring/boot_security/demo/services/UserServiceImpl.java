@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,9 +13,10 @@ import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@Primary
+//@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserDao userDao;
@@ -31,31 +33,41 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userDao.loadUserByUsername(name);
     }
 
+
     @Override
-    public List<User> listUser() {
-        return userDao.listUser();
+    public List<User> findAll() {
+        return userDao.findAll();
     }
 
     @Override
-    public Optional<User> getUser(long id) {
+    public User findByName(String username) {
+        return userDao.findByName(username);
+    }
+
+    @Override
+    public User getUser(Long id) {
         return userDao.getUser(id);
-    }
-
-    @Override
-    public Optional<User> getUser(String name) {
-        return userDao.getUser(name);
     }
 
     @Override
     @Transactional
     public void saveUser(User user) {
-        userDao.saveUser(user);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userDao.saveUser(user);
+
     }
 
     @Override
     @Transactional
-    public void deleteUser(long id) {
+    public void updateUser(User user) {
+        userDao.updateUser(user);
+
+
+    }
+
+    @Override
+    public void deleteUser(Long id) {
         userDao.deleteUser(id);
+
     }
 }

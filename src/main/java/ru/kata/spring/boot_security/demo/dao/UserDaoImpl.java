@@ -9,7 +9,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Repository
 public class UserDaoImpl implements UserDao, UserDetailsService {
@@ -20,26 +20,32 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = getUser(username).orElseThrow(() ->
-                new UsernameNotFoundException(String.format(username)));
-        return user;
-    }
+
+
 
     @Override
-    public List<User> listUser() {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUserName(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+        return new org.springframework.security.core.userdetails
+                .User(user.getUsername(), user.getPassword(), user.getAuthorities());
+    }
+
+
+    @Override
+    public List<User> findAll() {
         return userRepository.findAll();
     }
 
-    @Override
-    public Optional<User> getUser(long id) {
-        return userRepository.findById(id);
+    public User findByName(String username) {
+        return userRepository.findByUserName(username);
     }
 
     @Override
-    public Optional<User> getUser(String name) {
-        return userRepository.findByUsername(name);
+    public User getUser(Long id) {
+        return userRepository.findById(id).get();
     }
 
     @Override
@@ -48,7 +54,12 @@ public class UserDaoImpl implements UserDao, UserDetailsService {
     }
 
     @Override
-    public void deleteUser(long id) {
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 }
